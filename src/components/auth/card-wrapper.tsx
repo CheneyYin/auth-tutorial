@@ -34,7 +34,7 @@ export function CardWrapper({
       </CardHeader>
       <CardContent>{children}</CardContent>
       <CardFooter className="flex flex-col items-center justify-center space-y-2">
-        <div className="w-full flex flex-row items-center justify-center gap-2">
+        <div className="w-full flex flex-wrap items-center justify-center gap-2">
           <Social label="GitHub" icon={<FaGithub className="text-lg" />} />
           <Social label="Google" icon={<FcGoogle className="text-lg" />} />
         </div>

@@ -3,10 +3,10 @@ import { LoginForm } from "@/components/auth/login-form";
 
 const LoginPage = () => {
   return (
-    <div className=" w-1/3">
+    <div className=" lg:w-1/3">
       <CardWrapper
         label="Login"
-        backHref="/"
+        backHref="/auth/register"
         backLabel="Don't have an account."
       >
         <LoginForm />

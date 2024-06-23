@@ -10,34 +10,41 @@ import {
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { LoginSchema } from "@/schema";
+import { RegisterSchema } from "@/schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
-import { login } from "@/actions/auth";
+import { register } from "@/actions/auth";
 import { useState, useTransition } from "react";
 import { ScaleLoader } from "react-spinners";
 
-interface LoginFormProps {}
+interface RegisterFormProps {}
 
-export function LoginForm({}: LoginFormProps) {
+export function RegisterForm({}: RegisterFormProps) {
   const [isPending, startTransition] = useTransition();
   const [successMsg, setSuccessMsg] = useState<string>();
   const [errorMsg, setErrorsMsg] = useState<string>();
 
-  const form = useForm<z.infer<typeof LoginSchema>>({
-    resolver: zodResolver(LoginSchema),
+  const form = useForm<z.infer<typeof RegisterSchema>>({
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
       email: "jack@email.com",
       password: "******",
+      confirmPassword: "******",
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
+  const onSubmit = async (values: z.infer<typeof RegisterSchema>) => {
+    if (values.password !== values.confirmPassword) {
+      setSuccessMsg(undefined);
+      setErrorsMsg("The passwords entered twice are not consistent");
+      return;
+    }
+
     startTransition(async () => {
-      const ret = await login(values);
+      const ret = await register(values);
       if (ret.status === "success") {
-        setSuccessMsg("Login Success");
+        setSuccessMsg("Register Success");
         setErrorsMsg(undefined);
       } else {
         setSuccessMsg(undefined);
@@ -78,6 +85,19 @@ export function LoginForm({}: LoginFormProps) {
             </FormItem>
           )}
         />
+        <FormField
+          control={form.control}
+          name={"confirmPassword"}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Confirm Password</FormLabel>
+              <FormControl>
+                <Input {...field} type={"password"} disabled={isPending} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         {successMsg && <p className=" border-2">{successMsg}</p>}
 
@@ -86,7 +106,7 @@ export function LoginForm({}: LoginFormProps) {
           {isPending && (
             <ScaleLoader color="#36d7b7" className=" absolute py-2" />
           )}
-          <p>Sign In</p>
+          <p>Register</p>
         </Button>
       </form>
     </Form>
