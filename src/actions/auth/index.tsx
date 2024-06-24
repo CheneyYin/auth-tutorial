@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/db";
 import { LoginSchema, RegisterSchema } from "@/schema";
 import { string, z } from "zod";
+import * as crypto from "crypto";
 
 export interface Response<P> {
   status: "success" | "error";
@@ -25,21 +26,24 @@ function createErrorResponse<P>(msg: string, payload?: P): Response<P> {
   };
 }
 
+function sha256(value: string) {
+  return crypto.createHash("sha256").update(value).digest("hex");
+}
+
 export async function login(
   value: z.infer<typeof LoginSchema>,
 ): Promise<Response<{} | z.ZodError<typeof value>>> {
-  await sleep(3000);
   const ret = LoginSchema.safeParse(value);
   if (!ret.success) {
     return createErrorResponse("Invalid parameters", ret.error);
   }
 
-  const user = await getUserByEmail(value.email);
-  if (user === null) {
+  const isRegisted = await isExistUserByEmail(value.email);
+  if (!isRegisted) {
     return createErrorResponse("No user exists");
   }
 
-  if (user?.password !== value.password) {
+  if (!(await validateCredital(value.email, sha256(value.password)))) {
     return createErrorResponse("Incorrect password");
   }
 
@@ -49,7 +53,6 @@ export async function login(
 export async function register(
   value: z.infer<typeof RegisterSchema>,
 ): Promise<Response<{} | z.ZodError<typeof value>>> {
-  sleep(3000);
   const ret = RegisterSchema.safeParse(value);
   if (!ret.success) {
     return createErrorResponse("Invalid parameters", ret.error);
@@ -61,14 +64,18 @@ export async function register(
     );
   }
 
-  const _user = await getUserByEmail(value.email);
+  const isRegisted = await isExistUserByEmail(value.email);
 
-  if (_user !== null) {
+  if (isRegisted) {
     return createErrorResponse("The email has been registed.");
   }
 
   const { confirmPassword, ...userObj } = value;
-  const user = await saveUser(userObj);
+  const noPrivacyUserObj: User = {
+    ...userObj,
+    password: sha256(userObj.password),
+  };
+  const user = await saveUser(noPrivacyUserObj);
   return createSuccessResponse(user);
 }
 
@@ -84,6 +91,31 @@ export async function getUserByEmail(email: string) {
       email: email,
     },
   });
+}
+
+export async function validateCredital(email: string, password: string) {
+  const id = await prisma.user.findFirst({
+    select: {
+      id: true,
+    },
+    where: {
+      email: email,
+      password: password,
+    },
+  });
+  return id !== null;
+}
+
+export async function isExistUserByEmail(email: string) {
+  const id = await prisma.user.findFirst({
+    select: {
+      id: true,
+    },
+    where: {
+      email: email,
+    },
+  });
+  return id !== null;
 }
 
 export async function getAllUsers() {
