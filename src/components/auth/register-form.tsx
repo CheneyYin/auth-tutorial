@@ -28,6 +28,7 @@ export function RegisterForm({}: RegisterFormProps) {
   const form = useForm<z.infer<typeof RegisterSchema>>({
     resolver: zodResolver(RegisterSchema),
     defaultValues: {
+      name: "jack",
       email: "jack@email.com",
       password: "******",
       confirmPassword: "******",
@@ -59,6 +60,19 @@ export function RegisterForm({}: RegisterFormProps) {
         onSubmit={form.handleSubmit(onSubmit)}
         className="flex flex-col gap-4"
       >
+        <FormField
+          control={form.control}
+          name={"name"}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Name</FormLabel>
+              <FormControl>
+                <Input {...field} disabled={isPending} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <FormField
           control={form.control}
           name={"email"}
