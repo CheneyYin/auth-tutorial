@@ -1,9 +1,14 @@
 "use server";
 
-import { prisma } from "@/lib/db";
+import {
+  isExistUserByEmail,
+  saveUser,
+  User,
+  validateCredital,
+} from "@/data/user";
+import { sha256 } from "@/lib/hash";
 import { LoginSchema, RegisterSchema } from "@/schema";
-import { string, z } from "zod";
-import * as crypto from "crypto";
+import { z } from "zod";
 
 export interface Response<P> {
   status: "success" | "error";
@@ -24,10 +29,6 @@ function createErrorResponse<P>(msg: string, payload?: P): Response<P> {
     payload: payload,
     msg: msg,
   };
-}
-
-function sha256(value: string) {
-  return crypto.createHash("sha256").update(value).digest("hex");
 }
 
 export async function login(
@@ -82,50 +83,5 @@ export async function register(
 function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
-  });
-}
-
-export async function getUserByEmail(email: string) {
-  return prisma.user.findFirst({
-    where: {
-      email: email,
-    },
-  });
-}
-
-export async function validateCredital(email: string, password: string) {
-  const id = await prisma.user.findFirst({
-    select: {
-      id: true,
-    },
-    where: {
-      email: email,
-      password: password,
-    },
-  });
-  return id !== null;
-}
-
-export async function isExistUserByEmail(email: string) {
-  const id = await prisma.user.findFirst({
-    select: {
-      id: true,
-    },
-    where: {
-      email: email,
-    },
-  });
-  return id !== null;
-}
-
-export async function getAllUsers() {
-  return prisma.user.findMany();
-}
-
-export type User = Omit<z.infer<typeof RegisterSchema>, "confirmPassword">;
-
-export async function saveUser(value: User) {
-  return prisma.user.create({
-    data: value,
   });
 }
