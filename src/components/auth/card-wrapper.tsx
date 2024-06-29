@@ -18,8 +18,6 @@ import { Separator } from "../ui/separator";
 import { AuthHeader } from "./auth-header";
 import { Social } from "./social";
 
-
-
 interface CardWrapperProps {
   label: string;
   backHref: string;
