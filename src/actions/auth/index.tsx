@@ -1,14 +1,15 @@
 "use server";
 
+import { z } from "zod";
+
 import {
   isExistUserByEmail,
   saveUser,
-  User,
+  UserCreateArgs,
   validateCredital,
 } from "@/data/user";
 import { sha256 } from "@/lib/hash";
 import { LoginSchema, RegisterSchema } from "@/schema";
-import { z } from "zod";
 
 export interface Response<P> {
   status: "success" | "error";
@@ -71,17 +72,22 @@ export async function register(
     return createErrorResponse("The email has been registed.");
   }
 
-  const { confirmPassword, ...userObj } = value;
-  const noPrivacyUserObj: User = {
+  const {
+    confirmPassword, // eslint-disable-line no-unused-vars
+    ...userObj
+  } = value;
+  const userArgs: UserCreateArgs = {
     ...userObj,
     password: sha256(userObj.password),
   };
-  const user = await saveUser(noPrivacyUserObj);
+  const user = await saveUser(userArgs);
   return createSuccessResponse(user);
 }
 
+/* eslint-disable no-unused-vars */
 function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
+/* eslint-enable no-unused-vars */

@@ -1,16 +1,24 @@
+import Link from "next/link";
+
+import { FaGithub } from "react-icons/fa";
+
+import { FcGoogle } from "react-icons/fc";
+
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+
 import { Button } from "../ui/button";
-import Link from "next/link";
+
+import { Separator } from "../ui/separator";
+
 import { AuthHeader } from "./auth-header";
 import { Social } from "./social";
-import { FaGithub } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
-import { Separator } from "../ui/separator";
+
+
 
 interface CardWrapperProps {
   label: string;
@@ -25,7 +33,7 @@ export function CardWrapper({
   backHref,
   backLabel,
   children,
-  social,
+  social, // eslint-disable-line no-unused-vars
 }: CardWrapperProps) {
   return (
     <Card className=" drop-shadow-md">

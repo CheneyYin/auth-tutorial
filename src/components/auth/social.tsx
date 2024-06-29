@@ -1,5 +1,4 @@
 import { Button } from "../ui/button";
-import { GitHubLogoIcon } from "@radix-ui/react-icons";
 
 interface SocialProps {
   label: string;

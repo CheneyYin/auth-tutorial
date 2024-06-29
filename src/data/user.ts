@@ -1,11 +1,8 @@
 "use server";
 
-import { db } from "@/lib/db";
-import { RegisterSchema } from "@/schema";
 import { User } from "@prisma/client";
-import { z } from "zod";
 
-// export type User = Omit<z.infer<typeof RegisterSchema>, "confirmPassword">;
+import { db } from "@/lib/db";
 
 export async function getUserByEmail(email: string) {
   return db.user.findFirst({
@@ -44,7 +41,9 @@ export async function getAllUsers() {
   return db.user.findMany();
 }
 
-export async function saveUser(value: User) {
+export type UserCreateArgs = Pick<User, "name" | "email" | "password">;
+
+export async function saveUser(value: UserCreateArgs) {
   return db.user.create({
     data: value,
   });

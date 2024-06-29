@@ -1,5 +1,13 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState, useTransition } from "react";
+import { useForm } from "react-hook-form";
+
+import { ScaleLoader } from "react-spinners";
+import { z } from "zod";
+
+import { register } from "@/actions/auth";
 import {
   Form,
   FormControl,
@@ -8,18 +16,18 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+
 import { RegisterSchema } from "@/schema";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Input } from "../ui/input";
+
+
 import { Button } from "../ui/button";
-import { register } from "@/actions/auth";
-import { useState, useTransition } from "react";
-import { ScaleLoader } from "react-spinners";
+import { Input } from "../ui/input";
+
+
 
 interface RegisterFormProps {}
 
+// eslint-disable-next-line no-empty-pattern
 export function RegisterForm({}: RegisterFormProps) {
   const [isPending, startTransition] = useTransition();
   const [successMsg, setSuccessMsg] = useState<string>();
