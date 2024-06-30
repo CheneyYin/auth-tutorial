@@ -1,7 +1,7 @@
 import { CardWrapper } from "@/components/auth/card-wrapper";
 import { LoginForm } from "@/components/auth/login-form";
 
-const LoginPage = () => {
+const LoginPage = async () => {
   return (
     <div className=" lg:w-1/3">
       <CardWrapper
