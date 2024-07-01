@@ -29,7 +29,7 @@ export default async function Home() {
         <CardContent>
           <div className="w-full flex flex-col flex-wrap items-center justify-center gap-4">
             <Button className=" w-full" variant={"outline"}>
-              <Link href={"/auth/login"}>Login</Link>
+              <Link href={"/auth/signin"}>Login</Link>
             </Button>
             <Button className=" w-full" variant={"outline"}>
               <Link href={"/auth/register"}>Register</Link>

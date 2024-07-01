@@ -1,13 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 
 import { ScaleLoader } from "react-spinners";
 import { z } from "zod";
 
-import { login } from "@/actions/auth";
 import {
   Form,
   FormControl,
@@ -29,6 +29,9 @@ export function LoginForm({}: LoginFormProps) {
   const [isPending, startTransition] = useTransition();
   const [successMsg, setSuccessMsg] = useState<string>();
   const [errorMsg, setErrorsMsg] = useState<string>();
+  const session = useSession();
+
+  console.log(session);
 
   const form = useForm<z.infer<typeof LoginSchema>>({
     resolver: zodResolver(LoginSchema),
@@ -40,13 +43,25 @@ export function LoginForm({}: LoginFormProps) {
 
   const onSubmit = async (values: z.infer<typeof LoginSchema>) => {
     startTransition(async () => {
-      const ret = await login(values);
-      if (ret.status === "success") {
-        setSuccessMsg("Login Success");
+      const parseRet = LoginSchema.safeParse(values);
+      if (!parseRet.success) {
+        setSuccessMsg(undefined);
+        setErrorsMsg(parseRet.error.message);
+      }
+
+      const signInRet = await signIn("credentials", {
+        email: values.email,
+        password: values.password,
+        redirect: true,
+        callbackUrl: "/",
+      });
+
+      if (signInRet?.ok) {
+        setSuccessMsg("Sign IN Success");
         setErrorsMsg(undefined);
       } else {
         setSuccessMsg(undefined);
-        setErrorsMsg(ret.msg);
+        setErrorsMsg("Fail to Sign IN");
       }
     });
   };
@@ -87,12 +102,23 @@ export function LoginForm({}: LoginFormProps) {
         {successMsg && <p className=" border-2">{successMsg}</p>}
 
         {errorMsg && <p className=" border-2">{errorMsg}</p>}
-        <Button type="submit" disabled={isPending}>
-          {isPending && (
-            <ScaleLoader color="#36d7b7" className=" absolute py-2" />
-          )}
-          <p>Sign In</p>
-        </Button>
+
+        {session.status === "unauthenticated" && (
+          <Button type="submit" disabled={isPending}>
+            {isPending && (
+              <ScaleLoader color="#36d7b7" className=" absolute py-2" />
+            )}
+            <p>Sign In</p>
+          </Button>
+        )}
+        {session.status === "authenticated" && (
+          <Button disabled={isPending} onClick={() => signOut()}>
+            {isPending && (
+              <ScaleLoader color="#36d7b7" className=" absolute py-2" />
+            )}
+            <p>Sign OUT</p>
+          </Button>
+        )}
       </form>
     </Form>
   );

@@ -25,6 +25,15 @@ export async function validateCredital(email: string, password: string) {
   return id !== null;
 }
 
+export async function findCredital(email: string, password: string) {
+  return await db.user.findFirst({
+    where: {
+      email: email,
+      password: password,
+    },
+  });
+}
+
 export async function isExistUserByEmail(email: string) {
   const id = await db.user.findFirst({
     select: {

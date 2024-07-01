@@ -2,6 +2,9 @@ import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GitHubProvider from "next-auth/providers/github";
 
+import { findCredital, isExistUserByEmail } from "@/data/user";
+import { sha256 } from "@/lib/hash";
+
 export const options: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -12,24 +15,38 @@ export const options: NextAuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "jsmith" },
+        email: { label: "Email", type: "text", placeholder: "J Smith" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         console.log(credentials);
-        // Add logic here to look up the user from the credentials supplied
-        const user = {
-          id: "123",
-          name: "J Smith",
-          email: "jsmith@example.com",
-        };
-
-        if (credentials?.username === user.name) {
-          return user;
-        } else {
+        if (!credentials || !credentials.email || !credentials.password) {
           return null;
         }
+
+        const isRegisted = await isExistUserByEmail(
+          credentials?.email as string,
+        );
+        if (!isRegisted) {
+          return null;
+        }
+
+        const user = await findCredital(
+          credentials?.email as string,
+          sha256(credentials?.password as string),
+        );
+        console.log(user);
+        return user;
       },
     }),
   ],
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
+  },
+  // pages: {
+  //   signIn: "/auth/signin",
+  //   signOut: "/auth/signout", // (used for check email message)
+  // }
 };
